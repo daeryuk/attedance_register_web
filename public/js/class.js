@@ -52,12 +52,12 @@ class ClassManager {
             classCard.className = 'class-card';
             classCard.dataset.classId = classItem.id;
             classCard.innerHTML = `
+                <button class="delete-class-btn" onclick="window.classManager.showDeleteClassModal(${classItem.id}, '${classItem.name}')" title="학급 삭제"></button>
                 <h4>${classItem.name}</h4>
                 <p>담임: ${classItem.teachers || '없음'}</p>
                 <p>학생 수: ${classItem.student_count || 0}명</p>
                 <div class="class-actions">
                     <button onclick="window.classManager.showClassDetailPage(${classItem.id})">상세보기</button>
-                    <button onclick="window.classManager.deleteClass(${classItem.id})">삭제</button>
                     <button class="attendance-btn" data-class-id="${classItem.id}">출석체크</button>
                     <button class="statistics-btn" onclick="window.statisticsManager.showStatisticsSection(${classItem.id})">통계</button>
                 </div>
@@ -76,15 +76,211 @@ class ClassManager {
     }
 
     showAddClassForm() {
-        this.currentClassId = null;
-        this.classNameInput.value = '';
-        this.classDetail.classList.remove('hidden');
-        this.teachersList.innerHTML = '';
-        this.studentsList.innerHTML = '';
-        
-        // 학급 생성 후 바로 선생님과 학생 추가 안내
-        if (typeof window.showNotification === 'function') {
-            window.showNotification('학급 이름을 입력하고 저장한 후, 선생님과 학생을 추가해주세요.', 'info');
+        if (typeof window.showModal === 'function') {
+            window.showModal(`
+                <h3>새 학급 만들기</h3>
+                <div class="form-group">
+                    <label for="modal-class-name">학급 이름</label>
+                    <input type="text" id="modal-class-name" placeholder="학급 이름을 입력하세요" style="width:100%;padding:12px;margin:10px 0;border:1.5px solid #e0e0e0;border-radius:8px;">
+                </div>
+                
+                <div class="form-group">
+                    <label>담임 선생님</label>
+                    <div id="modal-teachers-container" style="margin: 10px 0;">
+                        <div class="teacher-input-row" style="display:flex;gap:8px;margin-bottom:8px;">
+                            <input type="text" class="teacher-input" placeholder="선생님 이름" style="flex:1;padding:8px;border:1.5px solid #e0e0e0;border-radius:6px;">
+                            <button type="button" class="remove-teacher-btn" style="padding:8px 12px;background:#ff4757;color:white;border:none;border-radius:6px;cursor:pointer;">삭제</button>
+                        </div>
+                    </div>
+                    <button type="button" id="add-teacher-input-btn" style="padding:8px 16px;background:#6a82fb;color:white;border:none;border-radius:6px;cursor:pointer;font-size:12px;">+ 선생님 추가</button>
+                </div>
+                
+                <div class="form-group">
+                    <label>학생 목록</label>
+                    <div id="modal-students-container" style="margin: 10px 0;">
+                        <div class="student-input-row" style="display:flex;gap:8px;margin-bottom:8px;">
+                            <input type="text" class="student-input" placeholder="학생 이름" style="flex:1;padding:8px;border:1.5px solid #e0e0e0;border-radius:6px;">
+                            <button type="button" class="remove-student-btn" style="padding:8px 12px;background:#ff4757;color:white;border:none;border-radius:6px;cursor:pointer;">삭제</button>
+                        </div>
+                    </div>
+                    <button type="button" id="add-student-input-btn" style="padding:8px 16px;background:#6a82fb;color:white;border:none;border-radius:6px;cursor:pointer;font-size:12px;">+ 학생 추가</button>
+                </div>
+                
+                <div style="display:flex;gap:10px;justify-content:flex-end;">
+                    <button onclick="this.parentElement.parentElement.parentElement.remove()" style="background:#6c757d;">취소</button>
+                    <button id="modal-create-class-btn" style="background:#6a82fb;">학급 생성</button>
+                </div>
+            `);
+            
+            setTimeout(() => {
+                // 선생님 추가 버튼 이벤트
+                document.getElementById('add-teacher-input-btn').onclick = () => {
+                    const container = document.getElementById('modal-teachers-container');
+                    const newRow = document.createElement('div');
+                    newRow.className = 'teacher-input-row';
+                    newRow.style.cssText = 'display:flex;gap:8px;margin-bottom:8px;';
+                    newRow.innerHTML = `
+                        <input type="text" class="teacher-input" placeholder="선생님 이름" style="flex:1;padding:8px;border:1.5px solid #e0e0e0;border-radius:6px;">
+                        <button type="button" class="remove-teacher-btn" style="padding:8px 12px;background:#ff4757;color:white;border:none;border-radius:6px;cursor:pointer;">삭제</button>
+                    `;
+                    container.appendChild(newRow);
+                    
+                    // 새로 추가된 삭제 버튼에 이벤트 추가
+                    newRow.querySelector('.remove-teacher-btn').onclick = () => {
+                        if (container.children.length > 1) {
+                            newRow.remove();
+                        }
+                    };
+                };
+                
+                // 학생 추가 버튼 이벤트
+                document.getElementById('add-student-input-btn').onclick = () => {
+                    const container = document.getElementById('modal-students-container');
+                    const newRow = document.createElement('div');
+                    newRow.className = 'student-input-row';
+                    newRow.style.cssText = 'display:flex;gap:8px;margin-bottom:8px;';
+                    newRow.innerHTML = `
+                        <input type="text" class="student-input" placeholder="학생 이름" style="flex:1;padding:8px;border:1.5px solid #e0e0e0;border-radius:6px;">
+                        <button type="button" class="remove-student-btn" style="padding:8px 12px;background:#ff4757;color:white;border:none;border-radius:6px;cursor:pointer;">삭제</button>
+                    `;
+                    container.appendChild(newRow);
+                    
+                    // 새로 추가된 삭제 버튼에 이벤트 추가
+                    newRow.querySelector('.remove-student-btn').onclick = () => {
+                        if (container.children.length > 1) {
+                            newRow.remove();
+                        }
+                    };
+                };
+                
+                // 초기 삭제 버튼들에 이벤트 추가
+                document.querySelector('.remove-teacher-btn').onclick = () => {
+                    const container = document.getElementById('modal-teachers-container');
+                    if (container.children.length > 1) {
+                        container.firstElementChild.remove();
+                    }
+                };
+                
+                document.querySelector('.remove-student-btn').onclick = () => {
+                    const container = document.getElementById('modal-students-container');
+                    if (container.children.length > 1) {
+                        container.firstElementChild.remove();
+                    }
+                };
+                
+                // 학급 생성 버튼 이벤트
+                document.getElementById('modal-create-class-btn').onclick = () => {
+                    const className = document.getElementById('modal-class-name').value.trim();
+                    
+                    if (!className) {
+                        if (typeof window.showNotification === 'function') {
+                            window.showNotification('학급 이름을 입력하세요.', 'error');
+                        } else {
+                            alert('학급 이름을 입력하세요.');
+                        }
+                        return;
+                    }
+                    
+                    // 선생님 목록 수집
+                    const teacherInputs = document.querySelectorAll('.teacher-input');
+                    const teachers = Array.from(teacherInputs)
+                        .map(input => input.value.trim())
+                        .filter(name => name);
+                    
+                    // 학생 목록 수집
+                    const studentInputs = document.querySelectorAll('.student-input');
+                    const students = Array.from(studentInputs)
+                        .map(input => input.value.trim())
+                        .filter(name => name);
+                    
+                    this.createClassWithMembers(className, teachers, students);
+                    document.querySelector('.modal').remove();
+                };
+                
+                document.getElementById('modal-class-name').focus();
+                
+                // Enter 키 이벤트 추가
+                document.getElementById('modal-class-name').addEventListener('keypress', (e) => {
+                    if (e.key === 'Enter') {
+                        document.getElementById('modal-create-class-btn').click();
+                    }
+                });
+            }, 0);
+        } else {
+            // 폴백: 기존 방식
+            this.currentClassId = null;
+            this.classNameInput.value = '';
+            this.classDetail.classList.remove('hidden');
+            this.teachersList.innerHTML = '';
+            this.studentsList.innerHTML = '';
+        }
+    }
+
+    async createClassWithMembers(className, teachers, students) {
+        try {
+            // 1. 학급 생성
+            const classResponse = await fetch('/api/classes', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                credentials: 'include',
+                body: JSON.stringify({ name: className })
+            });
+
+            if (!classResponse.ok) {
+                const error = await classResponse.json();
+                throw new Error(error.message || '학급 생성에 실패했습니다.');
+            }
+
+            const classData = await classResponse.json();
+            const classId = classData.id;
+
+            // 2. 선생님들 추가
+            for (const teacherName of teachers) {
+                if (teacherName.trim()) {
+                    await fetch(`/api/classes/${classId}/teachers`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        credentials: 'include',
+                        body: JSON.stringify({ name: teacherName.trim() })
+                    });
+                }
+            }
+
+            // 3. 학생들 추가
+            for (const studentName of students) {
+                if (studentName.trim()) {
+                    await fetch(`/api/classes/${classId}/students`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        credentials: 'include',
+                        body: JSON.stringify({ name: studentName.trim() })
+                    });
+                }
+            }
+
+            // 4. 성공 메시지 표시
+            if (typeof window.showNotification === 'function') {
+                window.showNotification(`${className} 학급이 성공적으로 생성되었습니다!`, 'success');
+            } else {
+                alert(`${className} 학급이 성공적으로 생성되었습니다!`);
+            }
+
+            // 5. 학급 목록 새로고침
+            this.loadClasses();
+
+        } catch (error) {
+            console.error('학급 생성 에러:', error);
+            if (typeof window.showNotification === 'function') {
+                window.showNotification(error.message || '학급 생성 중 오류가 발생했습니다.', 'error');
+            } else {
+                alert(error.message || '학급 생성 중 오류가 발생했습니다.');
+            }
         }
     }
 
@@ -110,6 +306,11 @@ class ClassManager {
             });
 
             if (response.ok) {
+                if (typeof window.showNotification === 'function') {
+                    window.showNotification('학급이 성공적으로 저장되었습니다.', 'success');
+                } else {
+                    alert('학급이 성공적으로 저장되었습니다.');
+                }
                 this.loadClasses();
                 this.classDetail.classList.add('hidden');
             } else if (response.status === 401) {
@@ -118,11 +319,19 @@ class ClassManager {
                 document.getElementById('login-section').classList.remove('hidden');
             } else {
                 const error = await response.json();
-                alert(error.message || '학급 저장에 실패했습니다.');
+                if (typeof window.showNotification === 'function') {
+                    window.showNotification(error.message || '학급 저장에 실패했습니다.', 'error');
+                } else {
+                    alert(error.message || '학급 저장에 실패했습니다.');
+                }
             }
         } catch (error) {
             console.error('학급 저장 에러:', error);
-            alert('학급 저장 중 오류가 발생했습니다.');
+            if (typeof window.showNotification === 'function') {
+                window.showNotification('학급 저장 중 오류가 발생했습니다.', 'error');
+            } else {
+                alert('학급 저장 중 오류가 발생했습니다.');
+            }
         }
     }
 
@@ -159,7 +368,7 @@ class ClassManager {
                                         classData.teachers.map(teacher => `
                                             <div class="teacher-item">
                                                 <span>${teacher.name}</span>
-                                                <button onclick="window.classManager.deleteTeacher(${teacher.id})" class="delete-btn">삭제</button>
+                                                <button onclick="window.classManager.showDeleteTeacherModal(${teacher.id}, '${teacher.name}')" class="delete-icon-btn" title="선생님 삭제"></button>
                                             </div>
                                         `).join('') : 
                                         '<p style="text-align: center; color: #6c757d; font-style: italic; padding: 20px;">등록된 선생님이 없습니다.</p>'
@@ -174,7 +383,7 @@ class ClassManager {
                                         classData.students.map(student => `
                                             <div class="student-item">
                                                 <span>${student.name}</span>
-                                                <button onclick="window.classManager.deleteStudent(${student.id})" class="delete-btn">삭제</button>
+                                                <button onclick="window.classManager.showDeleteStudentModal(${student.id}, '${student.name}')" class="delete-icon-btn" title="학생 삭제"></button>
                                             </div>
                                         `).join('') : 
                                         '<p style="text-align: center; color: #6c757d; font-style: italic; padding: 20px;">등록된 학생이 없습니다.</p>'
@@ -216,31 +425,104 @@ class ClassManager {
         }
     }
 
-    async deleteClass(classId) {
-        if (!confirm('정말로 이 학급을 삭제하시겠습니까?')) {
-            return;
+    showDeleteClassModal(classId, className) {
+        if (typeof window.showModal === 'function') {
+            window.showModal(`
+                <h3>학급 삭제</h3>
+                <p style="margin-bottom: 20px; color: #666;">
+                    <strong>${className}</strong> 학급을 삭제하시겠습니까?<br>
+                    이 작업은 되돌릴 수 없으며, 모든 출석 기록도 함께 삭제됩니다.
+                </p>
+                <div class="form-group">
+                    <label for="modal-password">비밀번호 확인</label>
+                    <input type="password" id="modal-password" placeholder="비밀번호를 입력하세요" style="width:100%;padding:12px;margin:10px 0;border:1.5px solid #e0e0e0;border-radius:8px;">
+                </div>
+                <div style="display:flex;gap:10px;justify-content:flex-end;">
+                    <button onclick="this.parentElement.parentElement.parentElement.remove()" style="background:#6c757d;">취소</button>
+                    <button id="modal-delete-class-btn" style="background:#ff4757;">삭제</button>
+                </div>
+            `);
+            setTimeout(() => {
+                document.getElementById('modal-delete-class-btn').onclick = () => {
+                    const password = document.getElementById('modal-password').value;
+                    if (password) {
+                        this.deleteClass(classId, password);
+                        document.querySelector('.modal').remove();
+                    } else {
+                        if (typeof window.showNotification === 'function') {
+                            window.showNotification('비밀번호를 입력하세요.', 'error');
+                        } else {
+                            alert('비밀번호를 입력하세요.');
+                        }
+                    }
+                };
+                document.getElementById('modal-password').focus();
+                
+                // Enter 키 이벤트 추가
+                document.getElementById('modal-password').addEventListener('keypress', (e) => {
+                    if (e.key === 'Enter') {
+                        document.getElementById('modal-delete-class-btn').click();
+                    }
+                });
+            }, 0);
+        } else {
+            const password = prompt('학급을 삭제하려면 비밀번호를 입력하세요:');
+            if (password) {
+                this.deleteClass(classId, password);
+            }
         }
+    }
 
+    async deleteClass(classId, password) {
         try {
             const response = await fetch(`/api/classes/${classId}`, {
                 method: 'DELETE',
-                credentials: 'include'
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                credentials: 'include',
+                body: JSON.stringify({ password })
             });
 
             if (response.ok) {
+                if (typeof window.showNotification === 'function') {
+                    window.showNotification('학급이 성공적으로 삭제되었습니다.', 'success');
+                } else {
+                    alert('학급이 성공적으로 삭제되었습니다.');
+                }
                 this.loadClasses();
                 this.classDetail.classList.add('hidden');
+                
+                // 상세보기 페이지가 열려있다면 닫기
+                const detailPage = document.querySelector('.detail-page');
+                if (detailPage) {
+                    detailPage.remove();
+                }
             } else if (response.status === 401) {
                 // 로그인되지 않은 상태 - 로그인 페이지로 이동
                 document.getElementById('main-section').classList.add('hidden');
                 document.getElementById('login-section').classList.remove('hidden');
+            } else if (response.status === 403) {
+                if (typeof window.showNotification === 'function') {
+                    window.showNotification('비밀번호가 올바르지 않습니다.', 'error');
+                } else {
+                    alert('비밀번호가 올바르지 않습니다.');
+                }
             } else {
                 const error = await response.json();
+                if (typeof window.showNotification === 'function') {
+                    window.showNotification(error.message || '학급 삭제에 실패했습니다.', 'error');
+                } else {
                 alert(error.message || '학급 삭제에 실패했습니다.');
+                }
             }
         } catch (error) {
             console.error('학급 삭제 에러:', error);
+            if (typeof window.showNotification === 'function') {
+                window.showNotification('학급 삭제 중 오류가 발생했습니다.', 'error');
+            } else {
             alert('학급 삭제 중 오류가 발생했습니다.');
+            }
         }
     }
 
@@ -398,57 +680,95 @@ class ClassManager {
         });
     }
 
-    async deleteTeacher(teacherId) {
-        if (!confirm('정말로 이 선생님을 삭제하시겠습니까?')) {
-            return;
-        }
-
+    async deleteTeacher(teacherId, password) {
         try {
             const response = await fetch(`/api/classes/${this.currentClassId}/teachers/${teacherId}`, {
                 method: 'DELETE',
-                credentials: 'include'
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                credentials: 'include',
+                body: JSON.stringify({ password })
             });
 
             if (response.ok) {
+                if (typeof window.showNotification === 'function') {
+                    window.showNotification('선생님이 성공적으로 삭제되었습니다.', 'success');
+                } else {
+                    alert('선생님이 성공적으로 삭제되었습니다.');
+                }
                 this.showDetailPage(this.currentClassId);
             } else if (response.status === 401) {
                 // 로그인되지 않은 상태 - 로그인 페이지로 이동
                 document.getElementById('main-section').classList.add('hidden');
                 document.getElementById('login-section').classList.remove('hidden');
+            } else if (response.status === 403) {
+                if (typeof window.showNotification === 'function') {
+                    window.showNotification('비밀번호가 올바르지 않습니다.', 'error');
+                } else {
+                    alert('비밀번호가 올바르지 않습니다.');
+                }
             } else {
                 const error = await response.json();
-                alert(error.message || '선생님 삭제에 실패했습니다.');
+                if (typeof window.showNotification === 'function') {
+                    window.showNotification(error.message || '선생님 삭제에 실패했습니다.', 'error');
+                } else {
+                    alert(error.message || '선생님 삭제에 실패했습니다.');
+                }
             }
         } catch (error) {
             console.error('선생님 삭제 에러:', error);
-            alert('선생님 삭제 중 오류가 발생했습니다.');
+            if (typeof window.showNotification === 'function') {
+                window.showNotification('선생님 삭제 중 오류가 발생했습니다.', 'error');
+            } else {
+                alert('선생님 삭제 중 오류가 발생했습니다.');
+            }
         }
     }
 
-    async deleteStudent(studentId) {
-        if (!confirm('정말로 이 학생을 삭제하시겠습니까?')) {
-            return;
-        }
-
+    async deleteStudent(studentId, password) {
         try {
             const response = await fetch(`/api/classes/${this.currentClassId}/students/${studentId}`, {
                 method: 'DELETE',
-                credentials: 'include'
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                credentials: 'include',
+                body: JSON.stringify({ password })
             });
 
             if (response.ok) {
+                if (typeof window.showNotification === 'function') {
+                    window.showNotification('학생이 성공적으로 삭제되었습니다.', 'success');
+                } else {
+                    alert('학생이 성공적으로 삭제되었습니다.');
+                }
                 this.showDetailPage(this.currentClassId);
             } else if (response.status === 401) {
                 // 로그인되지 않은 상태 - 로그인 페이지로 이동
                 document.getElementById('main-section').classList.add('hidden');
                 document.getElementById('login-section').classList.remove('hidden');
+            } else if (response.status === 403) {
+                if (typeof window.showNotification === 'function') {
+                    window.showNotification('비밀번호가 올바르지 않습니다.', 'error');
+                } else {
+                    alert('비밀번호가 올바르지 않습니다.');
+                }
             } else {
                 const error = await response.json();
-                alert(error.message || '학생 삭제에 실패했습니다.');
+                if (typeof window.showNotification === 'function') {
+                    window.showNotification(error.message || '학생 삭제에 실패했습니다.', 'error');
+                } else {
+                    alert(error.message || '학생 삭제에 실패했습니다.');
+                }
             }
         } catch (error) {
             console.error('학생 삭제 에러:', error);
-            alert('학생 삭제 중 오류가 발생했습니다.');
+            if (typeof window.showNotification === 'function') {
+                window.showNotification('학생 삭제 중 오류가 발생했습니다.', 'error');
+            } else {
+                alert('학생 삭제 중 오류가 발생했습니다.');
+            }
         }
     }
 
@@ -484,6 +804,102 @@ class ClassManager {
         
         // 상세보기 페이지 숨기기
         this.hideDetailPage();
+    }
+
+    showDeleteTeacherModal(teacherId, teacherName) {
+        if (typeof window.showModal === 'function') {
+            window.showModal(`
+                <h3>선생님 삭제</h3>
+                <p style="margin-bottom: 20px; color: #666;">
+                    <strong>${teacherName}</strong> 선생님을 삭제하시겠습니까?<br>
+                    이 작업은 되돌릴 수 없습니다.
+                </p>
+                <div class="form-group">
+                    <label for="modal-password">비밀번호 확인</label>
+                    <input type="password" id="modal-password" placeholder="비밀번호를 입력하세요" style="width:100%;padding:12px;margin:10px 0;border:1.5px solid #e0e0e0;border-radius:8px;">
+                </div>
+                <div style="display:flex;gap:10px;justify-content:flex-end;">
+                    <button onclick="this.parentElement.parentElement.parentElement.remove()" style="background:#6c757d;">취소</button>
+                    <button id="modal-delete-teacher-btn" style="background:#ff4757;">삭제</button>
+                </div>
+            `);
+            setTimeout(() => {
+                document.getElementById('modal-delete-teacher-btn').onclick = () => {
+                    const password = document.getElementById('modal-password').value;
+                    if (password) {
+                        this.deleteTeacher(teacherId, password);
+                        document.querySelector('.modal').remove();
+                    } else {
+                        if (typeof window.showNotification === 'function') {
+                            window.showNotification('비밀번호를 입력하세요.', 'error');
+                        } else {
+                            alert('비밀번호를 입력하세요.');
+                        }
+                    }
+                };
+                document.getElementById('modal-password').focus();
+                
+                // Enter 키 이벤트 추가
+                document.getElementById('modal-password').addEventListener('keypress', (e) => {
+                    if (e.key === 'Enter') {
+                        document.getElementById('modal-delete-teacher-btn').click();
+                    }
+                });
+            }, 0);
+        } else {
+            const password = prompt('선생님을 삭제하려면 비밀번호를 입력하세요:');
+            if (password) {
+                this.deleteTeacher(teacherId, password);
+            }
+        }
+    }
+
+    showDeleteStudentModal(studentId, studentName) {
+        if (typeof window.showModal === 'function') {
+            window.showModal(`
+                <h3>학생 삭제</h3>
+                <p style="margin-bottom: 20px; color: #666;">
+                    <strong>${studentName}</strong> 학생을 삭제하시겠습니까?<br>
+                    이 작업은 되돌릴 수 없으며, 모든 출석 기록도 함께 삭제됩니다.
+                </p>
+                <div class="form-group">
+                    <label for="modal-password">비밀번호 확인</label>
+                    <input type="password" id="modal-password" placeholder="비밀번호를 입력하세요" style="width:100%;padding:12px;margin:10px 0;border:1.5px solid #e0e0e0;border-radius:8px;">
+                </div>
+                <div style="display:flex;gap:10px;justify-content:flex-end;">
+                    <button onclick="this.parentElement.parentElement.parentElement.remove()" style="background:#6c757d;">취소</button>
+                    <button id="modal-delete-student-btn" style="background:#ff4757;">삭제</button>
+                </div>
+            `);
+            setTimeout(() => {
+                document.getElementById('modal-delete-student-btn').onclick = () => {
+                    const password = document.getElementById('modal-password').value;
+                    if (password) {
+                        this.deleteStudent(studentId, password);
+                        document.querySelector('.modal').remove();
+                    } else {
+                        if (typeof window.showNotification === 'function') {
+                            window.showNotification('비밀번호를 입력하세요.', 'error');
+                        } else {
+                            alert('비밀번호를 입력하세요.');
+                        }
+                    }
+                };
+                document.getElementById('modal-password').focus();
+                
+                // Enter 키 이벤트 추가
+                document.getElementById('modal-password').addEventListener('keypress', (e) => {
+                    if (e.key === 'Enter') {
+                        document.getElementById('modal-delete-student-btn').click();
+                    }
+                });
+            }, 0);
+        } else {
+            const password = prompt('학생을 삭제하려면 비밀번호를 입력하세요:');
+            if (password) {
+                this.deleteStudent(studentId, password);
+            }
+        }
     }
 }
 

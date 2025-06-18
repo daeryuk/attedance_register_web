@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const pool = require('../db');
 const auth = require('../middleware/auth');
+const bcrypt = require('bcryptjs');
 
 // 모든 학급 조회
 router.get('/', auth, async (req, res) => {
@@ -107,6 +108,29 @@ router.put('/:id', auth, async (req, res) => {
 // 학급 삭제
 router.delete('/:id', auth, async (req, res) => {
     try {
+        const { password } = req.body;
+        
+        if (!password) {
+            return res.status(400).json({ message: '비밀번호를 입력해주세요.' });
+        }
+        
+        // 사용자 비밀번호 확인
+        const [users] = await pool.execute(
+            'SELECT password FROM users WHERE id = ?',
+            [req.userData.userId]
+        );
+        
+        if (users.length === 0) {
+            return res.status(404).json({ message: '사용자를 찾을 수 없습니다.' });
+        }
+        
+        // 비밀번호 확인 (bcrypt.compare 사용)
+        const isValidPassword = await bcrypt.compare(password, users[0].password);
+        if (!isValidPassword) {
+            return res.status(403).json({ message: '비밀번호가 올바르지 않습니다.' });
+        }
+        
+        // 학급 삭제 (CASCADE로 관련 데이터도 함께 삭제됨)
         const [result] = await pool.execute(
             'DELETE FROM classes WHERE id = ? AND created_by = ?',
             [req.params.id, req.userData.userId]
@@ -156,6 +180,27 @@ router.post('/:id/teachers', auth, async (req, res) => {
 router.delete('/:id/teachers/:teacherId', auth, async (req, res) => {
     try {
         const { id: classId, teacherId } = req.params;
+        const { password } = req.body;
+        
+        if (!password) {
+            return res.status(400).json({ message: '비밀번호를 입력해주세요.' });
+        }
+        
+        // 사용자 비밀번호 확인
+        const [users] = await pool.execute(
+            'SELECT password FROM users WHERE id = ?',
+            [req.userData.userId]
+        );
+        
+        if (users.length === 0) {
+            return res.status(404).json({ message: '사용자를 찾을 수 없습니다.' });
+        }
+        
+        // 비밀번호 확인 (bcrypt.compare 사용)
+        const isValidPassword = await bcrypt.compare(password, users[0].password);
+        if (!isValidPassword) {
+            return res.status(403).json({ message: '비밀번호가 올바르지 않습니다.' });
+        }
         
         // 학급 소유권 확인
         const [classes] = await pool.execute(
@@ -217,6 +262,27 @@ router.post('/:id/students', auth, async (req, res) => {
 router.delete('/:id/students/:studentId', auth, async (req, res) => {
     try {
         const { id: classId, studentId } = req.params;
+        const { password } = req.body;
+        
+        if (!password) {
+            return res.status(400).json({ message: '비밀번호를 입력해주세요.' });
+        }
+        
+        // 사용자 비밀번호 확인
+        const [users] = await pool.execute(
+            'SELECT password FROM users WHERE id = ?',
+            [req.userData.userId]
+        );
+        
+        if (users.length === 0) {
+            return res.status(404).json({ message: '사용자를 찾을 수 없습니다.' });
+        }
+        
+        // 비밀번호 확인 (bcrypt.compare 사용)
+        const isValidPassword = await bcrypt.compare(password, users[0].password);
+        if (!isValidPassword) {
+            return res.status(403).json({ message: '비밀번호가 올바르지 않습니다.' });
+        }
         
         // 학급 소유권 확인
         const [classes] = await pool.execute(

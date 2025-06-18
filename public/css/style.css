@@ -145,8 +145,95 @@ input:focus, select:focus {
     font-size: 1.4rem;
 }
 
-.modal-content input {
-    margin-bottom: 20px;
+.modal-content .teacher-input-row,
+.modal-content .student-input-row {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 8px;
+    align-items: center;
+}
+
+.modal-content .teacher-input,
+.modal-content .student-input {
+    flex: 1;
+    padding: 8px 12px;
+    border: 1.5px solid #e0e0e0;
+    border-radius: 6px;
+    font-size: 14px;
+    transition: border-color 0.3s ease;
+}
+
+.modal-content .teacher-input:focus,
+.modal-content .student-input:focus {
+    outline: none;
+    border-color: #6a82fb;
+    box-shadow: 0 0 0 2px rgba(106, 130, 251, 0.1);
+}
+
+.modal-content .remove-teacher-btn,
+.modal-content .remove-student-btn {
+    padding: 8px 12px;
+    background: #ff4757;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 12px;
+    transition: all 0.3s ease;
+    min-width: 60px;
+}
+
+.modal-content .remove-teacher-btn:hover,
+.modal-content .remove-student-btn:hover {
+    background: #ff3742;
+    transform: translateY(-1px);
+}
+
+.modal-content #add-teacher-input-btn,
+.modal-content #add-student-input-btn {
+    padding: 8px 16px;
+    background: #6a82fb;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 12px;
+    transition: all 0.3s ease;
+    margin-top: 8px;
+}
+
+.modal-content #add-teacher-input-btn:hover,
+.modal-content #add-student-input-btn:hover {
+    background: #5a6fd8;
+    transform: translateY(-1px);
+}
+
+/* 기존 모달 입력 필드 스타일 */
+.modal-content input[type="text"],
+.modal-content input[type="password"],
+.modal-content textarea {
+    width: 100%;
+    padding: 12px;
+    margin: 10px 0;
+    border: 1.5px solid #e0e0e0;
+    border-radius: 8px;
+    font-size: 14px;
+    font-family: inherit;
+    transition: border-color 0.3s ease;
+}
+
+.modal-content input[type="text"]:focus,
+.modal-content input[type="password"]:focus,
+.modal-content textarea:focus {
+    outline: none;
+    border-color: #6a82fb;
+    box-shadow: 0 0 0 3px rgba(106, 130, 251, 0.1);
+}
+
+.modal-content textarea {
+    resize: vertical;
+    min-height: 80px;
+    line-height: 1.5;
 }
 
 .modal-content button {
@@ -162,6 +249,7 @@ input:focus, select:focus {
     margin-bottom: 12px;
     border: 1.5px solid #e0e0e0;
     transition: all 0.2s;
+    position: relative;
 }
 
 .class-card:hover, .student-card:hover, .teacher-item:hover, .student-item:hover {
@@ -170,10 +258,54 @@ input:focus, select:focus {
     transform: translateY(-2px);
 }
 
+/* 반 카드 삭제 버튼 */
+.class-card .delete-class-btn {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #ff4757 0%, #ff3742 100%);
+    color: white;
+    border: 2px solid #fff;
+    font-size: 16px;
+    font-weight: bold;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s ease;
+    opacity: 0.8;
+    z-index: 10;
+    box-shadow: 0 2px 8px rgba(255, 71, 87, 0.3);
+    font-family: 'Material Icons', sans-serif;
+}
+
+.class-card .delete-class-btn::before {
+    content: 'close';
+    font-family: 'Material Icons';
+    font-size: 18px;
+}
+
+.class-card .delete-class-btn:hover {
+    background: linear-gradient(135deg, #ff3742 0%, #ff2e3a 100%);
+    opacity: 1;
+    transform: scale(1.15) rotate(90deg);
+    box-shadow: 0 4px 16px rgba(255, 71, 87, 0.4);
+    border-color: #fff;
+}
+
+.class-card:hover .delete-class-btn {
+    opacity: 1;
+    transform: scale(1.05);
+}
+
 .class-card h4, .student-card h4 {
     color: #6a82fb;
     font-weight: 700;
     margin-bottom: 8px;
+    padding-right: 30px;
 }
 
 .class-card p {
@@ -749,60 +881,84 @@ input:focus, select:focus {
 
 .detail-page .teacher-item,
 .detail-page .student-item {
+    position: relative;
     display: flex;
-    justify-content: space-between;
     align-items: center;
-    padding: 15px 20px;
-    background: white;
+    justify-content: space-between;
+    padding: 12px 16px;
+    margin-bottom: 8px;
+    background: #fff;
+    border: 1.5px solid #e0e0e0;
     border-radius: 10px;
-    border: 1px solid #e9ecef;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
     transition: all 0.3s ease;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
 }
 
 .detail-page .teacher-item:hover,
 .detail-page .student-item:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
     border-color: #6a82fb;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(106, 130, 251, 0.15);
 }
 
 .detail-page .teacher-item span,
 .detail-page .student-item span {
-    font-size: 16px;
+    font-weight: 600;
     color: #333;
-    font-weight: 500;
-    display: flex;
-    align-items: center;
-    gap: 8px;
+    font-size: 1rem;
+    flex: 1;
+    padding-right: 50px;
 }
 
 .detail-page .teacher-item span::before {
     content: '👨‍🏫';
-    font-size: 18px;
+    margin-right: 8px;
 }
 
 .detail-page .student-item span::before {
     content: '👨‍🎓';
-    font-size: 18px;
+    margin-right: 8px;
 }
 
-.detail-page .delete-btn {
-    background: linear-gradient(135deg, #ff6b6b 0%, #ee5a52 100%);
+.detail-page .delete-icon-btn {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #ff4757 0%, #ff3742 100%);
     color: white;
-    border: none;
-    padding: 8px 16px;
-    border-radius: 20px;
+    border: 2px solid #fff;
+    font-size: 14px;
+    font-weight: bold;
     cursor: pointer;
-    font-size: 12px;
-    font-weight: 500;
+    display: flex;
+    align-items: center;
+    justify-content: center;
     transition: all 0.3s ease;
-    box-shadow: 0 2px 8px rgba(255, 107, 107, 0.3);
+    opacity: 0.7;
+    z-index: 10;
+    box-shadow: 0 2px 6px rgba(255, 71, 87, 0.3);
+    font-family: 'Material Icons', sans-serif;
 }
 
-.detail-page .delete-btn:hover {
-    transform: translateY(-1px);
-    box-shadow: 0 4px 12px rgba(255, 107, 107, 0.4);
+.detail-page .delete-icon-btn::before {
+    content: 'delete';
+    font-family: 'Material Icons';
+    font-size: 16px;
+}
+
+.detail-page .delete-icon-btn:hover {
+    background: linear-gradient(135deg, #ff3742 0%, #ff2e3a 100%);
+    opacity: 1;
+    transform: scale(1.1);
+    box-shadow: 0 4px 12px rgba(255, 71, 87, 0.4);
+}
+
+.detail-page .teacher-item:hover .delete-icon-btn,
+.detail-page .student-item:hover .delete-icon-btn {
+    opacity: 1;
 }
 
 .detail-page .add-btn {
