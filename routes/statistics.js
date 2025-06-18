@@ -18,19 +18,22 @@ router.get('/:classId', auth, async (req, res) => {
             return res.status(404).json({ message: '학급을 찾을 수 없습니다.' });
         }
         
-        // 전체 출석률 계산
+        // 전체 출석률 계산 - 수정된 로직
         const [attendanceStats] = await pool.execute(
             `SELECT 
                 COUNT(DISTINCT a.id) as total_attendance,
-                COUNT(DISTINCT s.id) * DATEDIFF(CURRENT_DATE, MIN(a.date)) as total_possible
+                COUNT(DISTINCT s.id) as total_students,
+                COUNT(DISTINCT a.date) as total_days
             FROM students s
             LEFT JOIN attendances a ON s.id = a.student_id
             WHERE s.class_id = ?`,
             [classId]
         );
         
-        const attendanceRate = attendanceStats[0].total_possible > 0 ?
-            Math.round((attendanceStats[0].total_attendance / attendanceStats[0].total_possible) * 100) : 0;
+        const stats = attendanceStats[0];
+        const totalPossible = stats.total_students * stats.total_days;
+        const attendanceRate = totalPossible > 0 ?
+            Math.round((stats.total_attendance / totalPossible) * 100) : 0;
         
         // 장기 결석자 조회 (3주 이상)
         const [longTermAbsent] = await pool.execute(
@@ -97,8 +100,8 @@ router.get('/overall', auth, async (req, res) => {
                 SELECT 
                     c.id,
                     CASE 
-                        WHEN COUNT(DISTINCT s.id) * DATEDIFF(CURRENT_DATE, MIN(a.date)) > 0 
-                        THEN (COUNT(DISTINCT a.id) * 100.0) / (COUNT(DISTINCT s.id) * DATEDIFF(CURRENT_DATE, MIN(a.date)))
+                        WHEN COUNT(DISTINCT s.id) * COUNT(DISTINCT a.date) > 0 
+                        THEN (COUNT(DISTINCT a.id) * 100.0) / (COUNT(DISTINCT s.id) * COUNT(DISTINCT a.date))
                         ELSE 0 
                     END as attendance_rate
                 FROM classes c
@@ -118,8 +121,8 @@ router.get('/overall', auth, async (req, res) => {
                 COUNT(DISTINCT s.id) as student_count,
                 COUNT(DISTINCT t.id) as teacher_count,
                 CASE 
-                    WHEN COUNT(DISTINCT s.id) * DATEDIFF(CURRENT_DATE, MIN(a.date)) > 0 
-                    THEN ROUND((COUNT(DISTINCT a.id) * 100.0) / (COUNT(DISTINCT s.id) * DATEDIFF(CURRENT_DATE, MIN(a.date))), 1)
+                    WHEN COUNT(DISTINCT s.id) * COUNT(DISTINCT a.date) > 0 
+                    THEN ROUND((COUNT(DISTINCT a.id) * 100.0) / (COUNT(DISTINCT s.id) * COUNT(DISTINCT a.date)), 1)
                     ELSE 0 
                 END as attendance_rate
             FROM classes c

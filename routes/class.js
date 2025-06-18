@@ -369,19 +369,22 @@ router.get('/:id/statistics', auth, async (req, res) => {
             return res.status(404).json({ message: '학급을 찾을 수 없습니다.' });
         }
         
-        // 전체 출석률 계산
+        // 전체 출석률 계산 - 수정된 로직
         const [attendanceStats] = await pool.execute(
             `SELECT 
                 COUNT(DISTINCT a.id) as total_attendance,
-                COUNT(DISTINCT s.id) * DATEDIFF(CURRENT_DATE, MIN(a.date)) as total_possible
+                COUNT(DISTINCT s.id) as total_students,
+                COUNT(DISTINCT a.date) as total_days
             FROM students s
             LEFT JOIN attendances a ON s.id = a.student_id
             WHERE s.class_id = ?`,
             [classId]
         );
         
-        const attendanceRate = attendanceStats[0].total_possible > 0 ?
-            Math.round((attendanceStats[0].total_attendance / attendanceStats[0].total_possible) * 100) : 0;
+        const stats = attendanceStats[0];
+        const totalPossible = stats.total_students * stats.total_days;
+        const attendanceRate = totalPossible > 0 ?
+            Math.round((stats.total_attendance / totalPossible) * 100) : 0;
         
         // 장기 결석자 조회 (3주 이상)
         const [longTermAbsent] = await pool.execute(

@@ -86,7 +86,7 @@ class AttendanceManager {
                     console.log('렌더링 중이므로 대기...');
                     setTimeout(() => this.renderStudents(students), 100);
                 } else {
-                    this.renderStudents(students);
+                this.renderStudents(students);
                 }
             } else if (response.status === 401) {
                 // 로그인되지 않은 상태 - 로그인 페이지로 이동
@@ -176,7 +176,7 @@ class AttendanceManager {
             
             studentCard.innerHTML = `
                 <div class="student-info">
-                    <h4>${student.name}</h4>
+                <h4>${student.name}</h4>
                 </div>
                 <div class="attendance-button">
                     <button class="attendance-btn ${existingStatus === 'present' ? 'present' : ''}" 
