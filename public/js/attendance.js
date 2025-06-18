@@ -44,6 +44,12 @@ class AttendanceManager {
         this.isRendering = false;
         this.lastCallTime = 0;
         
+        // 출석 관리 헤더 제거
+        const attendanceHeader = this.attendanceSection.querySelector('.attendance-header');
+        if (attendanceHeader) {
+            attendanceHeader.remove();
+        }
+        
         // 모든 학생 카드 제거
         const existingCards = document.querySelectorAll('.student-card');
         existingCards.forEach(card => card.remove());
@@ -149,6 +155,42 @@ class AttendanceManager {
             console.error('출석 데이터 로드 에러:', error);
         }
         
+        // 출석 관리 헤더 추가
+        const headerHTML = `
+            <div class="attendance-header">
+                <div class="attendance-title">
+                    <h2>📚 출석 관리</h2>
+                    <p class="attendance-date">${new Date().toLocaleDateString('ko-KR', { 
+                        year: 'numeric', 
+                        month: 'long', 
+                        day: 'numeric',
+                        weekday: 'long'
+                    })}</p>
+                </div>
+                <div class="attendance-stats">
+                    <div class="stat-item">
+                        <span class="stat-value">${finalStudents.length}</span>
+                        <span class="stat-label">전체 학생</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-value">${Object.keys(todayAttendance).length}</span>
+                        <span class="stat-label">출석 완료</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-value">${finalStudents.length - Object.keys(todayAttendance).length}</span>
+                        <span class="stat-label">미출석</span>
+                    </div>
+                </div>
+            </div>
+        `;
+        
+        // 헤더 추가
+        this.attendanceSection.insertAdjacentHTML('afterbegin', headerHTML);
+        
+        // 학생 목록 컨테이너
+        const studentsContainer = document.createElement('div');
+        studentsContainer.className = 'students-container';
+        
         finalStudents.forEach(student => {
             // 이미 렌더링된 학생인지 확인
             if (renderedStudentIds.has(student.id)) {
@@ -166,17 +208,30 @@ class AttendanceManager {
             const existingStatus = todayAttendance[student.id];
             let cardClass = 'student-card';
             let buttonText = '출석체크';
+            let statusIcon = '⏰';
+            let statusClass = '';
             
             if (existingStatus === 'present') {
                 cardClass += ' present';
                 buttonText = '출석완료';
+                statusIcon = '✅';
+                statusClass = 'present';
             }
             
             studentCard.className = cardClass;
             
             studentCard.innerHTML = `
                 <div class="student-info">
+                    <div class="student-avatar">
+                        <span class="avatar-text">${student.name.charAt(0)}</span>
+                    </div>
+                    <div class="student-details">
                 <h4>${student.name}</h4>
+                        <p class="student-status ${statusClass}">
+                            <span class="status-icon">${statusIcon}</span>
+                            <span class="status-text">${existingStatus === 'present' ? '출석 완료' : '출석 대기'}</span>
+                        </p>
+                    </div>
                 </div>
                 <div class="attendance-button">
                     <button class="attendance-btn ${existingStatus === 'present' ? 'present' : ''}" 
@@ -187,8 +242,10 @@ class AttendanceManager {
                 </div>
             `;
             
-            this.attendanceList.appendChild(studentCard);
+            studentsContainer.appendChild(studentCard);
         });
+        
+        this.attendanceList.appendChild(studentsContainer);
         
         console.log('실제 렌더링된 학생 수:', renderedStudentIds.size);
         this.isRendering = false;

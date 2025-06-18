@@ -63,7 +63,6 @@ class AuthManager {
 
             if (response.ok) {
                 const data = await response.json();
-                alert('로그인 성공!');
                 this.showMainSection();
                 // 다른 컴포넌트들 초기화
                 if (window.classManager) {
