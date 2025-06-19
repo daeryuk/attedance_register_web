@@ -25,3 +25,4 @@ node server.js
 ## 4. 기타
 - config.js는 환경변수 기반으로 동작합니다.
 - .env 파일은 로컬 개발용, Cloudtype은 환경변수 UI에서 직접 입력 
+"# attendance-firebase-web" 
