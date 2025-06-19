@@ -1314,4 +1314,94 @@ input:focus, select:focus {
     .attendance-btn {
         width: 100%;
     }
-} 
+}
+
+/* --- 모달 리디자인 추가 스타일 --- */
+.modal-label {
+  font-weight: 600;
+  color: #444;
+  margin-bottom: 6px;
+  display: block;
+  font-size: 1rem;
+}
+.modal-input {
+  width: 100%;
+  padding: 13px 14px;
+  margin: 8px 0 14px 0;
+  border: 1.5px solid #e0e0e0;
+  border-radius: 8px;
+  font-size: 15px;
+  background: #f7f8fa;
+  transition: border-color 0.3s, box-shadow 0.3s;
+}
+.modal-input:focus {
+  border-color: #6a82fb;
+  box-shadow: 0 0 0 2px #6a82fb22;
+  outline: none;
+}
+.modal-add-btn {
+  padding: 8px 18px;
+  background: linear-gradient(90deg,#6a82fb 60%,#fc5c7d 100%);
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 600;
+  margin-top: 6px;
+  box-shadow: 0 2px 8px #6a82fb22;
+  transition: background 0.2s, transform 0.2s;
+}
+.modal-add-btn:hover {
+  background: linear-gradient(90deg,#5a6fd8 60%,#fc5c7d 100%);
+  transform: translateY(-2px) scale(1.04);
+}
+.modal-remove-btn {
+  padding: 8px 12px;
+  background: #ff4757;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 12px;
+  font-weight: 600;
+  transition: background 0.2s, transform 0.2s;
+}
+.modal-remove-btn:hover {
+  background: #ff3742;
+  transform: scale(1.08);
+}
+.modal-create-btn {
+  padding: 10px 28px;
+  background: linear-gradient(90deg,#6a82fb 60%,#fc5c7d 100%);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 1.08rem;
+  font-weight: 700;
+  box-shadow: 0 2px 12px #6a82fb22;
+  cursor: pointer;
+  transition: background 0.2s, transform 0.2s;
+}
+.modal-create-btn:hover {
+  background: linear-gradient(90deg,#5a6fd8 60%,#fc5c7d 100%);
+  transform: translateY(-2px) scale(1.04);
+}
+.modal-close-x {
+  position: absolute;
+  top: 18px;
+  right: 22px;
+  background: none;
+  border: none;
+  color: #aaa;
+  font-size: 1.5rem;
+  font-weight: bold;
+  cursor: pointer;
+  z-index: 10;
+  transition: color 0.2s, transform 0.2s;
+}
+.modal-close-x:hover {
+  color: #fc5c7d;
+  transform: scale(1.2) rotate(90deg);
+}
+/* --- 모달 리디자인 끝 --- */ 
