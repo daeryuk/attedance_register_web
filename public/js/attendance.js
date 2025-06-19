@@ -119,6 +119,10 @@ class AttendanceManager {
         // 기존 목록 완전히 초기화
         this.attendanceList.innerHTML = '';
         
+        // 기존 attendance-header 모두 제거
+        const oldHeaders = this.attendanceSection.querySelectorAll('.attendance-header');
+        oldHeaders.forEach(header => header.remove());
+        
         // 중복 제거 (같은 ID를 가진 학생이 여러 번 있는 경우)
         const uniqueStudents = students.filter((student, index, self) => 
             index === self.findIndex(s => s.id === student.id)

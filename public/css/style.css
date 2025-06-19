@@ -303,14 +303,38 @@ input:focus, select:focus {
 
 .class-actions {
     display: flex;
-    gap: 8px;
+    gap: 0;
     flex-wrap: wrap;
     margin-top: 12px;
 }
 
-.class-actions button {
-    padding: 8px 12px;
-    font-size: 0.8rem;
+.class-actions button,
+.class-actions .attendance-btn,
+.class-actions .statistics-btn {
+    background: linear-gradient(90deg,#6a82fb 60%,#fc5c7d 100%);
+    color: #fff;
+    border: none;
+    border-radius: 14px;
+    font-weight: 700;
+    font-size: 1rem;
+    padding: 10px 24px;
+    margin: 0;
+    box-shadow: 0 2px 8px #6a82fb22;
+    transition: background 0.2s, transform 0.2s;
+    outline: none;
+    cursor: pointer;
+    min-width: 90px;
+}
+
+.class-actions button:not(:last-child) {
+    margin-right: 8px;
+}
+
+.class-actions button:hover,
+.class-actions .attendance-btn:hover,
+.class-actions .statistics-btn:hover {
+    background: linear-gradient(90deg,#5a6fd8 60%,#fc5c7d 100%);
+    transform: translateY(-2px) scale(1.04);
 }
 
 /* 출석 상태 색상 */
