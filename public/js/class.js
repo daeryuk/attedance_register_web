@@ -52,7 +52,9 @@ class ClassManager {
             classCard.className = 'class-card';
             classCard.dataset.classId = classItem.id;
             classCard.innerHTML = `
-                <button class="delete-class-btn" onclick="window.classManager.showDeleteClassModal(${classItem.id}, '${classItem.name}')" title="학급 삭제"></button>
+                <button class="delete-class-btn" onclick="window.classManager.showDeleteClassModal(${classItem.id}, '${classItem.name}')" title="학급 삭제">
+                  <svg class="delete-icon" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#ff4757" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="6.5" width="18" height="14" rx="3"/><path d="M8 10v6M12 10v6M16 10v6"/><path d="M5 6.5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v1.5"/></svg>
+                </button>
                 <h4>${classItem.name}</h4>
                 <p>담임: ${classItem.teachers || '없음'}</p>
                 <p>학생 수: ${classItem.student_count || 0}명</p>
